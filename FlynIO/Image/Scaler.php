@@ -9,45 +9,42 @@ use Intervention\Image\Image;
  */
 class Scaler
 {
-    public Image $image;
-    public array $minDimensions = [100, 100];
-    public array $maxDimensions = [3840, 3840];
-
-    /**
-     * Constructor
-     *
-     * @param Image $image
-     * @param array $minDimensions  [int width = 100, int height = 100]
-     * @param array $maxDimensions  [int width = 3840, int height = 3840]
-     * @return void
-     */
-    public function __construct(Image $image, array $minDimensions = [100, 100], array $maxDimensions = [3840, 3840])
+    public function getAllowedDimensions(): array
     {
-        $this->image = $image;
-        $this->minDimensions = $minDimensions;
-        $this->maxDimensions = $maxDimensions;
+        return apply_filters('flynio-limit-dimensions', [
+            [100, 100],
+            [3840, 3840],
+        ]);
     }
 
-    public function scale(): bool
+    /**
+     * Scales an image to the min/max dimensions allowed.
+     *
+     * @param Image $image
+     * @return boolean
+     */
+    public function scale(Image $image): bool
     {
-        if (!$this->needsToScale()) {
+        list($minDimensions, $maxDimensions) = $this->getAllowedDimensions();
+
+        if (!$this->needsToScale($image, $minDimensions, $maxDimensions)) {
             return false;
         }
 
         // Resize up to min proportions
-        if ($this->image->width() < $this->minDimensions[0]) {
-            $this->image->widen($this->minDimensions[0]);
+        if ($image->width() < $minDimensions[0]) {
+            $image->widen($minDimensions[0]);
         }
-        if ($this->image->height() < $this->minDimensions[1]) {
-            $this->image->heighten($this->minDimensions[1]);
+        if ($image->height() < $minDimensions[1]) {
+            $image->heighten($minDimensions[1]);
         }
 
         //Resize down to max proportions
-        if ($this->image->width() > $this->maxDimensions[0]) {
-            $this->image->widen($this->maxDimensions[0]);
+        if ($image->width() > $maxDimensions[0]) {
+            $image->widen($maxDimensions[0]);
         }
-        if ($this->image->height() > $this->maxDimensions[1]) {
-            $this->image->heighten($this->maxDimensions[1]);
+        if ($image->height() > $maxDimensions[1]) {
+            $image->heighten($maxDimensions[1]);
         }
 
         return true;
@@ -57,17 +54,20 @@ class Scaler
      * Returns whether or not the current image needs to scale depending on
      * the given min/max dimensions.
      *
+     * @param Image $image
+     * @param array $minDimensions  [x, y]
+     * @param array $maxDimensions  [x, y]
      * @return boolean
      */
-    public function needsToScale(): bool
+    public function needsToScale(Image $image, array $minDimensions, array $maxDimensions): bool
     {
-        $width = $this->image->width();
-        $height = $this->image->height();
+        $width = $image->width();
+        $height = $image->height();
 
         return
-            $width < $this->minDimensions[0] ||
-            $width > $this->maxDimensions[0] ||
-            $height < $this->minDimensions[1] ||
-            $height > $this->maxDimensions[1];
+            $width < $minDimensions[0] ||
+            $width > $maxDimensions[0] ||
+            $height < $minDimensions[1] ||
+            $height > $maxDimensions[1];
     }
 }

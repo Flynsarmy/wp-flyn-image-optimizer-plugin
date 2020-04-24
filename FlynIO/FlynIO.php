@@ -2,6 +2,7 @@
 
 namespace FlynIO;
 
+use FlynIO\Image\Optimizer;
 use FlynIO\Image\Scaler;
 use Intervention\Image\ImageManager;
 
@@ -14,6 +15,10 @@ class FlynIO
 
     public function __construct()
     {
+        // Add backend menu pages and actions
+        $backend = new Backend();
+        $backend->init();
+
         add_filter('wp_handle_upload', [$this, 'handleUpload']);
     }
 
@@ -43,12 +48,8 @@ class FlynIO
         $img = $manager->make($params['file']);
 
         // Scale if we need to
-        list($minDimensions, $maxDimensions) = apply_filters('flynio-limit-dimensions', [
-            [self::MIN_WIDTH, self::MIN_HEIGHT],
-            [self::MAX_WIDTH, self::MAX_HEIGHT]
-        ]);
-        $scaler = new Scaler($img, $minDimensions, $maxDimensions);
-        $scaled = $scaler->scale();
+        $scaler = new Scaler();
+        $scaled = $scaler->scale($img);
 
         // Do we need to convert?
         $converted = false;
@@ -68,11 +69,8 @@ class FlynIO
         }
 
         // Optimize the image
-        $options = apply_filters('flynio-optimizer-options', []);
-        $logger = apply_filters('flynio-optimizer-logger', new \Psr\Log\NullLogger());
-        $factory = new \ImageOptimizer\OptimizerFactory($options, $logger);
-        
-        $factory->get()->optimize($params['file']);
+        $optimizer = new Optimizer();
+        $optimizer->optimize($params['file']);
 
         return $params;
     }
