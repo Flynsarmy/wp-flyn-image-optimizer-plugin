@@ -1,5 +1,8 @@
 # Flyn Image Optimizer for WordPRess
 
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+![Build Status - PHP](https://github.com/Flynsarmy/wp-flyn-image-optimizer-plugin/workflows/CI%20-%20PHP/badge.svg)
+
 This plugin automatically compresses and scales down overly large images on upload.
 
 ## Installation
