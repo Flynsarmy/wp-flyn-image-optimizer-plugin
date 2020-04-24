@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<ruleset name="PSR12 Coding Standards">
+    <description>A custom set of code standard rules</description>
+
+    <rule ref="PSR12"/>
+
+    <rule ref="Generic.Files.LineLength.TooLong">
+        <!--
+        Long description lines are allowed
+        -->
+        <exclude-pattern>flyn-wp-image-optimizer.php</exclude-pattern>
+    </rule>
+
+    <file>flyn-wp-image-optimizer.php</file>
+    <file>FlynIO/</file>
+    <file>tests/</file>
+
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+</ruleset>

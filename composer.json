@@ -1,0 +1,25 @@
+{
+    "name": "flynsarmy/flyn-wp-image-optimizer",
+    "description": "Automatically optimizes images on upload",
+    "type": "wordpress-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "flynsarmy",
+            "email": "flynsarmy@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "FlynIO\\": "FlynIO",
+            "FlynIOTests\\": "tests"
+        }
+    },
+    "require": {
+        "ps/image-optimizer": "^2.0",
+        "intervention/image": "^2.5"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.5"
+    }
+}
