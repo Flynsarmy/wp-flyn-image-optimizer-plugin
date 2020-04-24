@@ -10,12 +10,37 @@ This plugin automatically compresses and scales down overly large images on uplo
 * For OSX: `brew install advancecomp pngcrush gifsicle jpegoptim imagemagick pngnq optipng pngquant svgo`
 * Restart `apache` and `php-fpm`
 
-## For OSX
+## Filters
+
+### Setting minimum/maximum upload dimensions
+
+By default uploaded images are scaled to a minimum of 100x100 or maximum of 3840x3840. This can be changed with:
+
+```php
+add_filter('flynio-limit-dimensions', function ($dimensions) {
+    return [
+        [150, 150],  // minimum x/y dimensions
+        [1920, 1080], // maximum x/y dimensions
+    ];
+});
+```
+
+### Setting which image types to convert to JPG on upload
+
+By default bitmaps and tiffs are converted to jpeg on upload. This can be overridden with:
+
+```php
+add_filter('flynio-mimes-to-convert', function ($mimes) {
+    return ['image/bmp', 'image/tif', 'image/tiff'];
+});
+```
+
+### Setting optimizer options
 
 If using homebrew you'll likely want to overwrite the image optimizer's default filepaths like so:
 
 ```php
-add_filter('flyn-wpio-optimizer-options', function ($options) {
+add_filter('flynio-optimizer-options', function ($options) {
     return array_merge($options, [
         'jpegtran_bin' => '/usr/local/bin/jpegtran',
         'jpegoptim_bin' => '/usr/local/bin/jpegoptim',
@@ -26,9 +51,9 @@ add_filter('flyn-wpio-optimizer-options', function ($options) {
 });
 ```
 
-## Custom Logger
+### Custom optimizer logger
 
-By default `NullLogger` is used. Set a custom logger with the following:
+By default `NullLogger` is used by the image optimizer. Set a custom logger with the following:
 
 ```php
 class StdoutLogger extends \Psr\Log\AbstractLogger
@@ -44,7 +69,7 @@ class StdoutLogger extends \Psr\Log\AbstractLogger
         echo "<br/>\n";
     }
 }
-add_filter('flyn-wpio-optimizer-logger', function ($logger) {
+add_filter('flynio-optimizer-logger', function ($logger) {
     return new StdoutLogger();
 });
 ```

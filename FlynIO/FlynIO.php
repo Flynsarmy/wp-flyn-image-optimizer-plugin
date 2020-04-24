@@ -43,20 +43,22 @@ class FlynIO
         $img = $manager->make($params['file']);
 
         // Scale if we need to
-        $scaler = new Scaler($img, [self::MIN_WIDTH, self::MIN_HEIGHT], [self::MAX_WIDTH, self::MAX_HEIGHT]);
+        list($minDimensions, $maxDimensions) = apply_filters('flynio-limit-dimensions', [
+            [self::MIN_WIDTH, self::MIN_HEIGHT],
+            [self::MAX_WIDTH, self::MAX_HEIGHT]
+        ]);
+        $scaler = new Scaler($img, $minDimensions, $maxDimensions);
         $scaled = $scaler->scale();
 
         // Do we need to convert?
         $converted = false;
-        if (in_array($params['type'], ['image/bmp', 'image/tif', 'image/tiff'])) {
-            $ext = pathinfo($params['file'], PATHINFO_EXTENSION);
-            $params['file'] = substr($params['file'], 0, -1 * strlen($ext)) . 'jpg';
-            $params['url'] = substr($params['url'], 0, -1 * strlen($ext)) . 'jpg';
-            $params['type'] = 'image/jpeg';
+        $mimes = apply_filters('flynio-mimes-to-convert', ['image/bmp', 'image/tif', 'image/tiff']);
+        if (in_array($params['type'], $mimes)) {
+            $params = $this->convertToJpg($params);
             $converted = true;
         }
 
-        // Did we modify the image at all?
+        // Save the image if we modified it
         if ($scaled || $converted) {
             $img->save($params['file']);
         }
@@ -66,11 +68,28 @@ class FlynIO
         }
 
         // Optimize the image
-        $options = apply_filters('flyn-wpio-optimizer-options', []);
-        $logger = apply_filters('flyn-wpio-optimizer-logger', new \Psr\Log\NullLogger());
+        $options = apply_filters('flynio-optimizer-options', []);
+        $logger = apply_filters('flynio-optimizer-logger', new \Psr\Log\NullLogger());
         $factory = new \ImageOptimizer\OptimizerFactory($options, $logger);
         
         $factory->get()->optimize($params['file']);
+
+        return $params;
+    }
+
+    /**
+     * Converts an image's parameters to JPG format. These params come from
+     * the wordpress wp_handle_upload filter.
+     *
+     * @param array $params
+     * @return array
+     */
+    public function convertToJpg(array $params): array
+    {
+        $ext = pathinfo($params['file'], PATHINFO_EXTENSION);
+        $params['file'] = substr($params['file'], 0, -1 * strlen($ext)) . 'jpg';
+        $params['url'] = substr($params['url'], 0, -1 * strlen($ext)) . 'jpg';
+        $params['type'] = 'image/jpeg';
 
         return $params;
     }
