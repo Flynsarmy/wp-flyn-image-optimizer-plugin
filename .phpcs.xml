@@ -8,10 +8,10 @@
         <!--
         Long description lines are allowed
         -->
-        <exclude-pattern>flyn-wp-image-optimizer.php</exclude-pattern>
+        <exclude-pattern>flyn-image-optimizer.php</exclude-pattern>
     </rule>
 
-    <file>flyn-wp-image-optimizer.php</file>
+    <file>flyn-image-optimizer.php</file>
     <file>FlynIO/</file>
     <file>tests/</file>
 
