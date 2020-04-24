@@ -13,7 +13,6 @@
 
     <file>flyn-image-optimizer.php</file>
     <file>FlynIO/</file>
-    <file>tests/</file>
 
     <exclude-pattern>*/vendor/*</exclude-pattern>
 </ruleset>
