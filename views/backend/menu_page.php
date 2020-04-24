@@ -6,7 +6,7 @@
 <div class="wrap">
     <h1>Flyn Image Optimizer</h1>
 
-    <p>Images outside the dimensions <?= $minDimensions[0].'x'.$minDimensions[1] ?> and <?= $maxDimensions[0].'x'.$maxDimensions[1] ?> will be scaled to within these dimensions automatically on upload.</p>
+    <p>Images outside the dimensions <?= $minDimensions[0] . 'x' . $minDimensions[1] ?> and <?= $maxDimensions[0] . 'x' . $maxDimensions[1] ?> will be scaled to within these dimensions automatically on upload.</p>
 
     <p>Below is a list of binaries used by this plugin for image optimization. Try to have as many of these installed as possible for optimal image compression.</p>
     <table id="fbio-binary-table" class="wp-list-table widefat striped">
