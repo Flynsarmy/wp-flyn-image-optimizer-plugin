@@ -14,6 +14,12 @@ This plugin automatically compresses and scales down overly large images on uplo
 * For OSX: `brew install advancecomp pngcrush gifsicle jpegoptim imagemagick pngnq optipng pngquant svgo`
 * Restart `apache` and `php-fpm`
 
+## Usage
+
+For maximum performance, this plugins functionality is changed through filters rather than an admin page. See the Filters section below for details.
+
+WebP generation is enabled by default but automatic replacing on frontend images isn't. This is because you probably don't have WebP files generated for all your existing images yet. Run the mass converter in `Media - Tools` section of admin before enabling this functionality.
+
 ## Filters
 
 ### Setting minimum/maximum upload dimensions
@@ -76,4 +82,14 @@ class StdoutLogger extends \Psr\Log\AbstractLogger
 add_filter('flynio-optimizer-logger', function ($logger) {
     return new StdoutLogger();
 });
+```
+
+### Don't want automatic WebP image generation?
+```php
+add_filter('flynio-generate-webp-images', '__return_false');
+```
+
+### Enable <img> to <picture> conversion on site frontend
+```php
+add_filter('flynio-use-webp-images', '__return_true');
 ```

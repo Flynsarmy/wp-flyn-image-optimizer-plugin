@@ -3,6 +3,7 @@
 namespace FlynIO;
 
 use FlynIO\Image\Optimizer;
+use FlynIO\Image\PictureTags;
 use FlynIO\Image\Scaler;
 use FlynIO\Image\Converter;
 use Intervention\Image\ImageManager;
@@ -17,10 +18,13 @@ class FlynIO
 
         // Scale/convert/optimize full size image on upload
         add_filter('wp_handle_upload', [$this, 'handleUpload']);
+    
         // Generate WebP's of thumb sizes on creation
         add_filter('wp_generate_attachment_metadata', [$this, 'handleThumbGeneration'], 10, 3);
         // Delete WebP's along with jpegs/pngs
         add_filter('wp_delete_file', [$this, 'onDeleteFile'], 10, 2);
+        // Change <img> tags to <picture> tags to display our WebP's in frontned post content
+        add_filter('the_content', [$this, 'filterTheContent'], 999);
     }
 
     /**
@@ -61,6 +65,10 @@ class FlynIO
      */
     public function handleThumbGeneration(array $metadata, int $attachment_id, string $context): array
     {
+        if (!apply_filters('flynio-generate-webp-images', true)) {
+            return $metadata;
+        }
+
         $manager = new ImageManager(['driver' => 'imagick']);
 
         // Get the full directory path the images are uploaded to
@@ -79,10 +87,9 @@ class FlynIO
                 break;
             }
 
-            $ext = pathinfo($size['file'], PATHINFO_EXTENSION);
-            $filename = substr($size['file'], 0, -1 * strlen($ext)) . 'webp';
-
-            $img->save($dir . $filename);
+            if (in_array('WEBP', \Imagick::queryFormats())) {
+                $img->save($dir . $size['file'] . '.webp');
+            }
         }
 
         return $metadata;
@@ -96,13 +103,15 @@ class FlynIO
      */
     public function onDeleteFile(string $filename): string
     {
+        if (!apply_filters('flynio-generate-webp-images', true)) {
+            return $filename;
+        }
+
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         // If we're deleting a JPG or PNG
         if (in_array($ext, ['jpg', 'png'])) {
-            $webp = substr($filename, 0, -1 * strlen($ext)) . 'webp';
-
             // Delete the equivalent WebP file
-            @unlink($webp);
+            @unlink($filename . ".webp");
         }
 
         return $filename;
@@ -158,11 +167,21 @@ class FlynIO
         }
 
         // Generate the WebP
-        if (in_array('WEBP', \Imagick::queryFormats())) {
-            $pathinfo = pathinfo($params['file']);
-            $img->save($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '.webp');
+        if (apply_filters('flynio-generate-webp-images', true)) {
+            if (in_array('WEBP', \Imagick::queryFormats())) {
+                $img->save($params['file'] . '.webp');
+            }
         }
         
         return $params;
+    }
+
+    public function filterTheContent(string $content): string
+    {
+        if (!apply_filters('flynio-use-webp-images', false)) {
+            return $content;
+        }
+
+        return (new PictureTags())->replace($content);
     }
 }
