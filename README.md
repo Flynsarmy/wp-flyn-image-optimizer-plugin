@@ -12,7 +12,7 @@ This plugin automatically compresses and scales down overly large images on uplo
 * `composer install`
 * For Ubuntu: `apt-get update && apt-get install advancecomp pngcrush gifsicle jpegoptim imagemagick pngnq optipng pngquant`
 * For OSX: `brew install advancecomp pngcrush gifsicle jpegoptim imagemagick pngnq optipng pngquant svgo`
-* Restart `apache` and `php-fpm`
+* Restart `apache` and `php-fpm` services
 
 ## Usage
 
