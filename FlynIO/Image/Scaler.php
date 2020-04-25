@@ -32,7 +32,7 @@ class Scaler
     {
         list($minDimensions, $maxDimensions) = $this->getAllowedDimensions();
 
-        if (!$this->needsToScale($image, $minDimensions, $maxDimensions)) {
+        if (!$this->needsToScale($image)) {
             return false;
         }
 
