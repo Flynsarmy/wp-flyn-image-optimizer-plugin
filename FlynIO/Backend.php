@@ -11,15 +11,6 @@ class Backend
 {
     public function init()
     {
-        add_action('admin_enqueue_scripts', function ($suffix) {
-            if ($suffix !== 'media_page_flyn-image-optimizer') {
-                return;
-            }
-
-            wp_enqueue_script('postbox');
-            wp_enqueue_script('postbox-edit', 'path-to-file/postbox-edit.js', ['jquery', 'postbox']);
-        });
-
         add_action('admin_menu', function () {
             add_media_page(
                 'Flyn Image Optimizer',
@@ -47,7 +38,7 @@ class Backend
             $binaries[$binary] = [
                 'binary' => $binary,
                 'filteredPath' => $filteredPath,
-                'installed' => $installed[$filteredPath],
+                'installed' => $installed[$binary],
             ];
         }
 
@@ -56,6 +47,11 @@ class Backend
             'binary' => 'imagick',
             'filteredPath' => 'PHP extension',
             'installed' => class_exists("\Imagick") && !empty(\Imagick::queryFormats()),
+        ];
+        $binaries['imagemagick'] = [
+            'binary' => 'imagemagick',
+            'filteredPath' => 'Loaded through imagick',
+            'installed' => $binaries['imagick']['installed'] ? !empty(\Imagick::queryFormats()) : 'n/a',
         ];
 
         return $binaries;

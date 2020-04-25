@@ -9,9 +9,11 @@
 <div id="fbio-wrap" class="wrap">
     <h1>Flyn Image Optimizer</h1>
 
+    <p>Automatic compression, conversion and scaling of images on upload.</p>
+
     <nav class="nav-tab-wrapper">
         <label for="nav-tab-status" class="nav-tab nav-tab-active" role="tab">Status</label>
-        <label for="nav-tab-settings" class="nav-tab" role="tab">Settings</label>
+        <label for="nav-tab-tools" class="nav-tab" role="tab">Tools</label>
         <label for="nav-tab-help" class="nav-tab" role="tab">Help</label>
     </nav>
 
@@ -19,8 +21,8 @@
         <?php echo FlynIO\Utils::requireWith(__DIR__.'/tabs/status.php', compact(['converter', 'scaler', 'binaries'])); ?>
     </div>
 
-    <div id="nav-tab-settings" class="tab-content">
-        settings tab
+    <div id="nav-tab-tools" class="tab-content">
+        tools tab
     </div>
 
     <div id="nav-tab-help" class="tab-content">
