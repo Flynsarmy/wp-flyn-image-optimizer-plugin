@@ -21,7 +21,6 @@ class Optimizer
         'jpegtran',
         'optipng',
         'pngcrush',
-        'pngnq',
         'pngout',
         'pngquant',
         'svgo'
