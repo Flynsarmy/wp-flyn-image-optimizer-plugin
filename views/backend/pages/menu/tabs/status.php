@@ -30,6 +30,17 @@
 <?php endif; ?>
 <p>&nbsp;</p>
 
+<h3>
+    WebP Creation
+</h3>
+<?php if (!$converter->canConvert()): ?>
+    <div class="notice notice-error notice-alt inline">
+        <p>The WebP generator needs both imagick PHP extension and imagemagick app installed on your server to operate.</p>
+    </div>
+<?php endif; ?>
+<p>WebP copies will be automatically generated for your uploaded image and all its thumbnails.</p>
+<p>&nbsp;</p>
+
 <h3>Installed Binaries</h3>
 <p>Below is a list of binaries used by this plugin for image optimization. Try to have as many of these installed as possible for optimal image compression.</p>
 <table id="fbio-binary-table" class="wp-list-table widefat striped">

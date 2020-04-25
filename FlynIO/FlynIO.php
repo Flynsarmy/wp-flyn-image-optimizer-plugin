@@ -15,7 +15,12 @@ class FlynIO
         $backend = new Backend();
         $backend->init();
 
+        // Scale/convert/optimize full size image on upload
         add_filter('wp_handle_upload', [$this, 'handleUpload']);
+        // Generate WebP's of thumb sizes on creation
+        add_filter('wp_generate_attachment_metadata', [$this, 'handleThumbGeneration'], 10, 3);
+        // Delete WebP's along with jpegs/pngs
+        add_filter('wp_delete_file', [$this, 'onDeleteFile'], 10, 2);
     }
 
     /**
@@ -46,6 +51,69 @@ class FlynIO
         return $params;
     }
 
+    /**
+     * Generate WebP files for all image sizes on upload
+     *
+     * @param array $metadata
+     * @param integer $attachment_id
+     * @param string $context
+     * @return array
+     */
+    public function handleThumbGeneration(array $metadata, int $attachment_id, string $context): array
+    {
+        $manager = new ImageManager(['driver' => 'imagick']);
+
+        // Get the full directory path the images are uploaded to
+        $dir = wp_upload_dir()['basedir'] . '/' . dirname($metadata['file']) . '/';
+
+        foreach ($metadata['sizes'] as $size) {
+            // We're only creating WebP's of jpegs and pngs
+            if (!in_array($size['mime-type'], ['image/jpeg', 'image/png'])) {
+                continue;
+            }
+
+            try {
+                $img = $manager->make($dir . $size['file']);
+            } catch (\Exception $e) {
+                // Image magick errored out. Nothing more to do here.
+                break;
+            }
+
+            $ext = pathinfo($size['file'], PATHINFO_EXTENSION);
+            $filename = substr($size['file'], 0, -1 * strlen($ext)) . 'webp';
+
+            $img->save($dir . $filename);
+        }
+
+        return $metadata;
+    }
+
+    /**
+     * Delete WebP images along with jpegs/pngs
+     *
+     * @param string $filename
+     * @return string
+     */
+    public function onDeleteFile(string $filename): string
+    {
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        // If we're deleting a JPG or PNG
+        if (in_array($ext, ['jpg', 'png'])) {
+            $webp = substr($filename, 0, -1 * strlen($ext)) . 'webp';
+
+            // Delete the equivalent WebP file
+            @unlink($webp);
+        }
+
+        return $filename;
+    }
+
+    /**
+     * Scale, Convert and generate WebP copy of an image
+     *
+     * @param array $params
+     * @return array
+     */
     public function preOptimizeImage(array $params): array
     {
         // Make sure this is a type of image that we want to convert and that it exists.
