@@ -4,15 +4,11 @@ namespace FlynIO;
 
 use FlynIO\Image\Optimizer;
 use FlynIO\Image\Scaler;
+use FlynIO\Image\Converter;
 use Intervention\Image\ImageManager;
 
 class FlynIO
 {
-    public const MIN_WIDTH = 100;
-    public const MIN_HEIGHT = 100;
-    public const MAX_WIDTH = 3840;
-    public const MAX_HEIGHT = 3840;
-
     public function __construct()
     {
         // Add backend menu pages and actions
@@ -43,51 +39,37 @@ class FlynIO
 
         // Make sure this is a type of image that we want to convert and that it exists.
         $originalFilepath = $params['file'];
-
-        $manager = new ImageManager(['driver' => 'imagick']);
-        $img = $manager->make($params['file']);
-
-        // Scale if we need to
         $scaler = new Scaler();
-        $scaled = $scaler->scale($img);
+        $converter = new Converter();
 
-        // Do we need to convert?
-        $converted = false;
-        $mimes = apply_filters('flynio-mimes-to-convert', ['image/bmp', 'image/tif', 'image/tiff']);
-        if (in_array($params['type'], $mimes)) {
-            $params = $this->convertToJpg($params);
-            $converted = true;
-        }
+        if ($scaler->canScale() && $converter->canConvert()) {
+            $manager = new ImageManager(['driver' => 'imagick']);
+            $img = $manager->make($params['file']);
 
-        // Save the image if we modified it
-        if ($scaled || $converted) {
-            $img->save($params['file']);
-        }
+            // Scale if we need to
+            if ($scaler->needsToScale($img)) {
+                $scaled = $scaler->scale($img);
+            }
 
-        if ($converted) {
-            unlink($originalFilepath);
+            // Do we need to convert?
+            $converting = $converter->needsToConvert($params['type']);
+            if ($converting) {
+                $params = $converter->convert($params);
+            }
+
+            // Save the image if we modified it
+            if ($scaled || $converting) {
+                $img->save($params['file']);
+            }
+
+            if ($converting) {
+                unlink($originalFilepath);
+            }
         }
 
         // Optimize the image
         $optimizer = new Optimizer();
         $optimizer->optimize($params['file']);
-
-        return $params;
-    }
-
-    /**
-     * Converts an image's parameters to JPG format. These params come from
-     * the wordpress wp_handle_upload filter.
-     *
-     * @param array $params
-     * @return array
-     */
-    public function convertToJpg(array $params): array
-    {
-        $ext = pathinfo($params['file'], PATHINFO_EXTENSION);
-        $params['file'] = substr($params['file'], 0, -1 * strlen($ext)) . 'jpg';
-        $params['url'] = substr($params['url'], 0, -1 * strlen($ext)) . 'jpg';
-        $params['type'] = 'image/jpeg';
 
         return $params;
     }

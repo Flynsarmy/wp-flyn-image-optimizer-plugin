@@ -9,6 +9,11 @@ use Intervention\Image\Image;
  */
 class Scaler
 {
+    public function canScale(): bool
+    {
+        return class_exists("\Imagick") && !empty(\Imagick::queryFormats());
+    }
+
     public function getAllowedDimensions(): array
     {
         return apply_filters('flynio-limit-dimensions', [
@@ -55,12 +60,12 @@ class Scaler
      * the given min/max dimensions.
      *
      * @param Image $image
-     * @param array $minDimensions  [x, y]
-     * @param array $maxDimensions  [x, y]
      * @return boolean
      */
-    public function needsToScale(Image $image, array $minDimensions, array $maxDimensions): bool
+    public function needsToScale(Image $image): bool
     {
+        list($minDimensions, $maxDimensions) = $this->getAllowedDimensions();
+
         $width = $image->width();
         $height = $image->height();
 

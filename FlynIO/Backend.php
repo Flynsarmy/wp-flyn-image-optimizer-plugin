@@ -3,6 +3,7 @@
 namespace FlynIO;
 
 use FlynIO\Image\Optimizer;
+use FlynIO\Image\Converter;
 use FlynIO\Image\Scaler;
 use Symfony\Component\Process\ExecutableFinder;
 
@@ -10,6 +11,15 @@ class Backend
 {
     public function init()
     {
+        add_action('admin_enqueue_scripts', function ($suffix) {
+            if ($suffix !== 'media_page_flyn-image-optimizer') {
+                return;
+            }
+
+            wp_enqueue_script('postbox');
+            wp_enqueue_script('postbox-edit', 'path-to-file/postbox-edit.js', ['jquery', 'postbox']);
+        });
+
         add_action('admin_menu', function () {
             add_media_page(
                 'Flyn Image Optimizer',
@@ -57,12 +67,14 @@ class Backend
         wp_enqueue_style('jquery-ui-smoothness', 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css', [], null);
         wp_enqueue_script('jquery-ui-tooltip');
 
-        list($minDimensions, $maxDimensions) = (new Scaler())->getAllowedDimensions();
+        $scaler = new Scaler();
+        $converter = new Converter();
 
-        echo Utils::requireWith(__DIR__ . "/../views/backend/menu_page.php", [
+        echo Utils::requireWith(__DIR__ . "/../views/backend/pages/menu/index.php", [
             'binaries' => $this->getInstalledBinaryTable(),
-            'minDimensions' => $minDimensions,
-            'maxDimensions' => $maxDimensions,
+            'scaler' => $scaler,
+            'converter' => $converter,
+            'mimesToConvert' => $converter->getMimeTypesToConvert(),
         ]);
     }
 }
