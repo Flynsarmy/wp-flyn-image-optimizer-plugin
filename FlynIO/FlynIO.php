@@ -90,7 +90,7 @@ class FlynIO
         }
 
         // Generate the WebP
-        if (in_array('WEBP', Imagick::queryFormats())) {
+        if (in_array('WEBP', \Imagick::queryFormats())) {
             $pathinfo = pathinfo($params['file']);
             $img->save($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '.webp');
         }
