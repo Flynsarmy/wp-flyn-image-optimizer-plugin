@@ -11,7 +11,7 @@
         <p>The image scaler needs both imagick PHP extension and imagemagick app installed on your server to operate.</p>
     </div>
 <?php endif; ?>
-<p>Images outside the dimensions <strong><?= $minDimensions[0].'x'.$minDimensions[1] ?></strong> and <strong><?= $maxDimensions[0].'x'.$maxDimensions[1] ?></strong> will be scaled to within these dimensions automatically on upload.</p>
+<p>Images outside the dimensions <strong><?= $minDimensions[0] . 'x' . $minDimensions[1] ?></strong> and <strong><?= $maxDimensions[0] . 'x' . $maxDimensions[1] ?></strong> will be scaled to within these dimensions automatically on upload.</p>
 <p>&nbsp;</p>
 
 <h3>
