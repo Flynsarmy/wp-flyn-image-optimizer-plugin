@@ -18,7 +18,7 @@
     </nav>
 
     <div id="nav-tab-status" class="tab-content tab-content-active">
-        <?php echo FlynIO\Utils::requireWith(__DIR__.'/tabs/status.php', compact(['converter', 'scaler', 'binaries'])); ?>
+        <?php echo FlynIO\Utils::requireWith(__DIR__ . '/tabs/status.php', compact(['converter', 'scaler', 'binaries'])); ?>
     </div>
 
     <div id="nav-tab-tools" class="tab-content">
