@@ -1,4 +1,4 @@
-# Flyn Image Optimizer for WordPRess
+# Flyn Image Optimizer for WordPress
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 ![Build Status - PHP](https://github.com/Flynsarmy/wp-flyn-image-optimizer-plugin/workflows/CI%20-%20PHP/badge.svg)
