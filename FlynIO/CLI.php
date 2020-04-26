@@ -136,7 +136,7 @@ class CLI extends WP_CLI_Command
     {
         $assoc_args = wp_parse_args(
             $assoc_args,
-            [ 'image_size' => '' ]
+            ['image_size' => '']
         );
 
         // Validate image_size arg if passed
@@ -145,7 +145,7 @@ class CLI extends WP_CLI_Command
             WP_CLI::error(sprintf('Unknown image size "%s".', $image_size));
         }
 
-        $scale  = array_key_exists('scale', $assoc_args);
+        $scale = array_key_exists('scale', $assoc_args);
         $optimize = array_key_exists('optimize', $assoc_args);
         $yes = array_key_exists('yes', $assoc_args);
 
@@ -359,7 +359,7 @@ class CLI extends WP_CLI_Command
 
         $wpdb->queries = [];
 
-        if (! is_object($wp_object_cache)) {
+        if (!is_object($wp_object_cache)) {
             return;
         }
 
@@ -399,8 +399,7 @@ class CLI extends WP_CLI_Command
         $past_tense_verb_upper = ucfirst($past_tense_verb);
         if ($failures) {
             $failed_skipped_message = null === $skips ?
-                '' :
-                " ({$failures} failed" . ($skips ? ", {$skips} skipped" : '') . ')';
+                '' : " ({$failures} failed" . ($skips ? ", {$skips} skipped" : '') . ')';
             if ($successes) {
                 WP_CLI::error(
                     "Only {$past_tense_verb} {$successes} of {$total} {$plural_noun}{$failed_skipped_message}."
@@ -432,13 +431,13 @@ class CLI extends WP_CLI_Command
         static $irregular = array(
             'reset' => 'reset',
         );
-        if (isset($irregular[ $verb ])) {
-            return $irregular[ $verb ];
+        if (isset($irregular[$verb])) {
+            return $irregular[$verb];
         }
         $last = substr($verb, -1);
         if ('e' === $last) {
             $verb = substr($verb, 0, -1);
-        } elseif ('y' === $last && ! preg_match('/[aeiou]y$/', $verb)) {
+        } elseif ('y' === $last && !preg_match('/[aeiou]y$/', $verb)) {
             $verb = substr($verb, 0, -1) . 'i';
         } elseif (preg_match('/^[^aeiou]*[aeiou][^aeiouhwxy]$/', $verb)) {
             // Rule of thumb that most (all?) one-voweled regular verbs ending in vowel +
