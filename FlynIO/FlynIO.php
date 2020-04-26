@@ -76,13 +76,12 @@ class FlynIO
 
         try {
             $webp = new WebP();
-
-            if (!$webp->canConvert()) {
-                // phpcs:ignore Generic.Files.LineLength.TooLong
-                throw new \Exception("The WebP generator needs both imagick PHP extension with WEBP support and imagemagick app installed on your server to operate.");
-            }
         } catch (\Exception $e) {
             // Requirements for WebP generation not met. Nothing to do here.
+            return $metadata;
+        }
+
+        if (!$webp->canConvert()) {
             return $metadata;
         }
 
