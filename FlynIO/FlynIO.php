@@ -183,7 +183,7 @@ class FlynIO
                 $webp = new WebP();
     
                 if ($webp->canConvert()) {
-                    $webp->convert($img, $fromFilePath . '.webp');
+                    $webp->convert($img, $params['file'] . '.webp');
                 }
             } catch (\Exception $e) {
                 ;
