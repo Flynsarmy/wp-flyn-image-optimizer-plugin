@@ -161,15 +161,8 @@ class CLI extends WP_CLI_Command
             }
         }
 
-        try {
-            $this->scaler = new Scaler();
-            $this->optimizer = new Optimizer();
-            $this->webp = new WebP();
-            $this->manager = new ImageManager(['driver' => 'imagick']);
-        } catch (\Exception $e) {
-            WP_CLI::error($e->getMessage());
-        }
-        $this->baseUploadDir = wp_upload_dir()['basedir'] . '/';
+        // Set up generators required for this command
+        $this->init();
 
         // Check that the scaler and webp generator will work
         if ($scale && !$this->scaler->canScale()) {
@@ -206,34 +199,53 @@ class CLI extends WP_CLI_Command
             if (0 === $number % self::WP_CLEAR_OBJECT_CACHE_INTERVAL) {
                 $this->wpClearOjectCache();
             }
-            $this->processRegeneration(
+            list($rSuccesses, $rErrors, $rSkips) = $this->processRegeneration(
                 $postId,
                 $optimize,
                 $scale,
                 $image_size,
                 $number . '/' .
-                $count,
-                $successes,
-                $errors,
-                $skips
+                $count
             );
+
+            $successes += $rSuccesses;
+            $errors += $rErrors;
+            $skips += $rSkips;
         }
 
         $this->reportBatchOperationResults('image', 'regenerate', $count, $successes, $errors, $skips);
     }
 
-    // phpcs:ignore Generic.Files.LineLength.TooLong
-    private function processRegeneration(int $id, bool $optimize, bool $scale, string $image_size, string $progress, int &$successes, int &$errors, int &$skips): void
+    /**
+     * Sets up required generators.
+     *
+     * @return void
+     */
+    private function init(): void
     {
+        try {
+            $this->scaler = new Scaler();
+            $this->optimizer = new Optimizer();
+            $this->webp = new WebP();
+            $this->manager = new ImageManager(['driver' => 'imagick']);
+        } catch (\Exception $e) {
+            WP_CLI::error($e->getMessage());
+        }
+        $this->baseUploadDir = wp_upload_dir()['basedir'] . '/';
+    }
+
+    // phpcs:ignore Generic.Files.LineLength.TooLong
+    private function processRegeneration(int $id, bool $optimize, bool $scale, string $image_size, string $progress): array
+    {
+        $successes = $errors = $skips = 0;
         $att_desc = sprintf('ID %d', $id);
-        $thumbnail_desc = $image_size ? sprintf('"%s" thumbnail', $image_size) : 'thumbnail';
 
         // Note: zero-length string returned if no metadata, for instance if PDF or non-standard image (eg an SVG).
         $metadata = wp_get_attachment_metadata($id);
         if (!is_array($metadata)) {
             WP_CLI::warning("Unable to load metadata for $att_desc.");
-            $errors++;
-            return;
+            
+            return [$successes, $errors + 1, $skips];
         }
 
         $imageDir = $this->baseUploadDir . dirname($metadata['file']) . '/';
@@ -278,6 +290,7 @@ class CLI extends WP_CLI_Command
         $created = $this->maybeCreateWebPs($paths);
         
         if (!$scaled && !$optimized && $created === 0) {
+            $thumbnail_desc = $image_size ? sprintf('"%s" thumbnail', $image_size) : 'thumbnail';
             WP_CLI::log("$progress Skipped $thumbnail_desc regeneration for $att_desc.");
             $skips++;
         } else {
@@ -295,7 +308,7 @@ class CLI extends WP_CLI_Command
             $successes++;
         }
             
-        return;
+        return [$successes, $errors, $skips];
     }
 
     private function maybeCreateWebPs(array $paths): int
