@@ -9,7 +9,6 @@ use Intervention\Image\Image;
 use Intervention\Image\ImageManager;
 use WP_CLI;
 use WP_CLI_Command;
-use WP_CLI\Utils;
 use WP_Query;
 
 /**
@@ -198,10 +197,6 @@ class CLI extends WP_CLI_Command
             )
         );
 
-        if ($image_size) {
-            $image_size_filters = $this->addImageSizeFilters($image_size);
-        }
-
         $number    = 0;
         $successes = 0;
         $errors    = 0;
@@ -209,7 +204,7 @@ class CLI extends WP_CLI_Command
         foreach ($images->posts as $postId) {
             $number++;
             if (0 === $number % self::WP_CLEAR_OBJECT_CACHE_INTERVAL) {
-                Utils\wp_clear_object_cache();
+                $this->wpClearOjectCache();
             }
             $this->processRegeneration(
                 $postId,
@@ -224,11 +219,7 @@ class CLI extends WP_CLI_Command
             );
         }
 
-        if ($image_size) {
-            $this->remove_image_size_filters($image_size_filters);
-        }
-
-        Utils\report_batch_operation_results('image', 'regenerate', $count, $successes, $errors, $skips);
+        $this->reportBatchOperationResults('image', 'regenerate', $count, $successes, $errors, $skips);
     }
 
     // phpcs:ignore Generic.Files.LineLength.TooLong
@@ -349,5 +340,112 @@ class CLI extends WP_CLI_Command
         );
 
         return new WP_Query($query_args);
+    }
+
+    /**
+     * Clear WordPress internal object caches.
+     *
+     * In long-running scripts, the internal caches on `$wp_object_cache` and `$wpdb`
+     * can grow to consume gigabytes of memory. Periodically calling this utility
+     * can help with memory management.
+     *
+     * @access public
+     * @category System
+     * @deprecated 1.5.0
+     */
+    public function wpClearOjectCache()
+    {
+        global $wpdb, $wp_object_cache;
+
+        $wpdb->queries = [];
+
+        if (! is_object($wp_object_cache)) {
+            return;
+        }
+
+        // The following are Memcached (Redux) plugin specific (see https://core.trac.wordpress.org/ticket/31463).
+        if (isset($wp_object_cache->group_ops)) {
+            $wp_object_cache->group_ops = [];
+        }
+        if (isset($wp_object_cache->stats)) {
+            $wp_object_cache->stats = [];
+        }
+        if (isset($wp_object_cache->memcache_debug)) {
+            $wp_object_cache->memcache_debug = [];
+        }
+        // Used by `WP_Object_Cache` also.
+        if (isset($wp_object_cache->cache)) {
+            $wp_object_cache->cache = [];
+        }
+    }
+
+    /**
+     * Report the results of the same operation against multiple resources.
+     *
+     * @access public
+     * @category Input
+     *
+     * @param string       $noun      Resource being affected (e.g. plugin)
+     * @param string       $verb      Type of action happening to the noun (e.g. activate)
+     * @param integer      $total     Total number of resource being affected.
+     * @param integer      $successes Number of successful operations.
+     * @param integer      $failures  Number of failures.
+     * @param null|integer $skips     Optional. Number of skipped operations. Default null (don't show skips).
+     */
+    public function reportBatchOperationResults($noun, $verb, $total, $successes, $failures, $skips = null)
+    {
+        $plural_noun           = $noun . 's';
+        $past_tense_verb       = $this->pastTenseVerb($verb);
+        $past_tense_verb_upper = ucfirst($past_tense_verb);
+        if ($failures) {
+            $failed_skipped_message = null === $skips ?
+                '' :
+                " ({$failures} failed" . ($skips ? ", {$skips} skipped" : '') . ')';
+            if ($successes) {
+                WP_CLI::error(
+                    "Only {$past_tense_verb} {$successes} of {$total} {$plural_noun}{$failed_skipped_message}."
+                );
+            } else {
+                WP_CLI::error(
+                    "No {$plural_noun} {$past_tense_verb}{$failed_skipped_message}."
+                );
+            }
+        } else {
+            $skipped_message = $skips ? " ({$skips} skipped)" : '';
+            if ($successes || $skips) {
+                WP_CLI::success("{$past_tense_verb_upper} {$successes} of {$total} {$plural_noun}{$skipped_message}.");
+            } else {
+                $message = $total > 1 ? ucfirst($plural_noun) : ucfirst($noun);
+                WP_CLI::success("{$message} already {$past_tense_verb}.");
+            }
+        }
+    }
+
+    /**
+     * Returns past tense of verb, with limited accuracy. Only regular verbs catered for, apart from "reset".
+     *
+     * @param string $verb Verb to return past tense of.
+     * @return string
+     */
+    public function pastTenseVerb(string $verb): string
+    {
+        static $irregular = array(
+            'reset' => 'reset',
+        );
+        if (isset($irregular[ $verb ])) {
+            return $irregular[ $verb ];
+        }
+        $last = substr($verb, -1);
+        if ('e' === $last) {
+            $verb = substr($verb, 0, -1);
+        } elseif ('y' === $last && ! preg_match('/[aeiou]y$/', $verb)) {
+            $verb = substr($verb, 0, -1) . 'i';
+        } elseif (preg_match('/^[^aeiou]*[aeiou][^aeiouhwxy]$/', $verb)) {
+            // Rule of thumb that most (all?) one-voweled regular verbs ending in vowel +
+            // consonant (excluding "h", "w", "x", "y") double their final consonant - misses
+            // many cases (eg "submit").
+            $verb .= $last;
+        }
+        return $verb . 'ed';
     }
 }
