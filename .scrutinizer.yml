@@ -3,8 +3,9 @@ build:
     analysis:
       dependencies:
         before:
-          - composer require --dev johnpbloch/wordpress
+          - composer require --dev johnpbloch/wordpress wp-cli/wp-cli
 
 filter:
   dependency_paths:
     - wordpress/
+    - wp-cli/
