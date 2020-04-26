@@ -33,9 +33,9 @@
 <h3>
     WebP Creation
 </h3>
-<?php if (!$converter->canConvert()): ?>
+<?php if (!$webp->canConvert()): ?>
     <div class="notice notice-error notice-alt inline">
-        <p>The WebP generator needs both imagick PHP extension and imagemagick app installed on your server to operate.</p>
+        <p>The WebP generator needs both imagick PHP extension with WEBP support and imagemagick app installed on your server to operate.</p>
     </div>
 <?php endif; ?>
 <p>WebP copies will be automatically generated for your uploaded image and all its thumbnails.</p>

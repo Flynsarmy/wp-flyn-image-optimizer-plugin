@@ -5,6 +5,7 @@ namespace FlynIO;
 use FlynIO\Image\Optimizer;
 use FlynIO\Image\Converter;
 use FlynIO\Image\Scaler;
+use FlynIO\Image\WebP;
 use Symfony\Component\Process\ExecutableFinder;
 
 class Backend
@@ -65,11 +66,13 @@ class Backend
 
         $scaler = new Scaler();
         $converter = new Converter();
+        $webp = new WebP();
 
         echo Utils::requireWith(__DIR__ . "/../views/backend/pages/menu/index.php", [
             'binaries' => $this->getInstalledBinaryTable(),
             'scaler' => $scaler,
             'converter' => $converter,
+            'webp' => $webp,
             'mimesToConvert' => $converter->getMimeTypesToConvert(),
         ]);
     }

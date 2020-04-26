@@ -11,14 +11,16 @@ This plugin automatically compresses and scales down overly large images on uplo
 * `git clone` to */wp-content/plugins/flyn-wp-image-optimizer*
 * `composer install`
 * For Ubuntu: `apt-get update && apt-get install advancecomp pngcrush gifsicle jpegoptim imagemagick pngnq optipng pngquant`
-* For OSX: `brew install advancecomp pngcrush gifsicle jpegoptim imagemagick pngnq optipng pngquant svgo`
+* For OSX: `brew install advancecomp pngcrush gifsicle jpegoptim imagemagick pngnq optipng pngquant svgo wp-cli`
 * Restart `apache` and `php-fpm` services
+* `wp-cli` is required for batch operations
 
 ## Usage
 
 For maximum performance, this plugins functionality is changed through filters rather than an admin page. See the Filters section below for details.
 
-WebP generation is enabled by default but automatic replacing on frontend images isn't. This is because you probably don't have WebP files generated for all your existing images yet. Run the mass converter in `Media - Tools` section of admin before enabling this functionality.
+WebP generation is enabled by default but automatic replacing on frontend images isn't. This is because you probably don't have WebP files generated for all your existing images yet. 
+Run the CLI command `wp flynio regenerate --scale --optimize` before enabling this functionality.
 
 ## Filters
 

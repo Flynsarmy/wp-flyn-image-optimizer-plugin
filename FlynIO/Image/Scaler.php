@@ -9,6 +9,26 @@ use Intervention\Image\Image;
  */
 class Scaler
 {
+    /**
+     * [x, y]
+     */
+    public array $minDimensions;
+
+    /**
+     * [x, y]
+     */
+    public array $maxDimensions;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        list($minDimensions, $maxDimensions) = $this->getAllowedDimensions();
+        $this->minDimensions = $minDimensions;
+        $this->maxDimensions = $maxDimensions;
+    }
+
     public function canScale(): bool
     {
         return class_exists("\Imagick") && !empty(\Imagick::queryFormats());
@@ -30,26 +50,24 @@ class Scaler
      */
     public function scale(Image $image): bool
     {
-        list($minDimensions, $maxDimensions) = $this->getAllowedDimensions();
-
         if (!$this->needsToScale($image)) {
             return false;
         }
 
         // Resize up to min proportions
-        if ($image->width() < $minDimensions[0]) {
-            $image->widen($minDimensions[0]);
+        if ($image->width() < $this->minDimensions[0]) {
+            $image->widen($this->minDimensions[0]);
         }
-        if ($image->height() < $minDimensions[1]) {
-            $image->heighten($minDimensions[1]);
+        if ($image->height() < $this->minDimensions[1]) {
+            $image->heighten($this->minDimensions[1]);
         }
 
         //Resize down to max proportions
-        if ($image->width() > $maxDimensions[0]) {
-            $image->widen($maxDimensions[0]);
+        if ($image->width() > $this->maxDimensions[0]) {
+            $image->widen($this->maxDimensions[0]);
         }
-        if ($image->height() > $maxDimensions[1]) {
-            $image->heighten($maxDimensions[1]);
+        if ($image->height() > $this->maxDimensions[1]) {
+            $image->heighten($this->maxDimensions[1]);
         }
 
         return true;
@@ -64,15 +82,13 @@ class Scaler
      */
     public function needsToScale(Image $image): bool
     {
-        list($minDimensions, $maxDimensions) = $this->getAllowedDimensions();
-
         $width = $image->width();
         $height = $image->height();
 
         return
-            $width < $minDimensions[0] ||
-            $width > $maxDimensions[0] ||
-            $height < $minDimensions[1] ||
-            $height > $maxDimensions[1];
+            $width < $this->minDimensions[0] ||
+            $width > $this->maxDimensions[0] ||
+            $height < $this->minDimensions[1] ||
+            $height > $this->maxDimensions[1];
     }
 }

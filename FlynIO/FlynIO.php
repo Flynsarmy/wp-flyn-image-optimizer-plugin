@@ -6,6 +6,7 @@ use FlynIO\Image\Optimizer;
 use FlynIO\Image\PictureTags;
 use FlynIO\Image\Scaler;
 use FlynIO\Image\Converter;
+use FlynIO\Image\WebP;
 use Intervention\Image\ImageManager;
 
 class FlynIO
@@ -15,6 +16,10 @@ class FlynIO
         // Add backend menu pages and actions
         $backend = new Backend();
         $backend->init();
+
+        if (class_exists('\WP_CLI')) {
+            \WP_CLI::add_command('flynio', new \FlynIO\CLI());
+        }
 
         // Scale/convert/optimize full size image on upload
         add_filter('wp_handle_upload', [$this, 'handleUpload']);
@@ -69,6 +74,18 @@ class FlynIO
             return $metadata;
         }
 
+        try {
+            $webp = new WebP();
+
+            if (!$webp->canConvert()) {
+                // phpcs:ignore Generic.Files.LineLength.TooLong
+                throw new \Exception("The WebP generator needs both imagick PHP extension with WEBP support and imagemagick app installed on your server to operate.");
+            }
+        } catch (\Exception $e) {
+            // Requirements for WebP generation not met. Nothing to do here.
+            return $metadata;
+        }
+
         $manager = new ImageManager(['driver' => 'imagick']);
 
         // Get the full directory path the images are uploaded to
@@ -80,15 +97,13 @@ class FlynIO
                 continue;
             }
 
-            try {
-                $img = $manager->make($dir . $size['file']);
-            } catch (\Exception $e) {
-                // Image magick errored out. Nothing more to do here.
-                break;
-            }
+            $fromFilePath = $dir . $size['file'];
+            $img = $manager->make($fromFilePath);
 
-            if (in_array('WEBP', \Imagick::queryFormats())) {
-                $img->save($dir . $size['file'] . '.webp');
+            try {
+                $webp->convert($img, $fromFilePath . '.webp');
+            } catch (\Exception $e) {
+                continue;
             }
         }
 
@@ -146,10 +161,7 @@ class FlynIO
         }
 
         // Scale if we need to
-        $scaled = false;
-        if ($scaler->needsToScale($img)) {
-            $scaled = $scaler->scale($img);
-        }
+        $scaled = $scaler->scale($img);
 
         // Do we need to convert?
         $converting = $converter->needsToConvert($params['type']);
@@ -168,8 +180,14 @@ class FlynIO
 
         // Generate the WebP
         if (apply_filters('flynio-generate-webp-images', true)) {
-            if (in_array('WEBP', \Imagick::queryFormats())) {
-                $img->save($params['file'] . '.webp');
+            try {
+                $webp = new WebP();
+    
+                if ($webp->canConvert()) {
+                    $webp->convert($img, $fromFilePath . '.webp');
+                }
+            } catch (\Exception $e) {
+                ;
             }
         }
         

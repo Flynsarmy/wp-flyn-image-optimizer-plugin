@@ -5,7 +5,7 @@ namespace FlynIO\Image;
 use Intervention\Image\Image;
 
 /**
- * Handles scaling an imaage into min/max dimensions
+ * Handles converting images to JPEG
  */
 class Converter
 {
