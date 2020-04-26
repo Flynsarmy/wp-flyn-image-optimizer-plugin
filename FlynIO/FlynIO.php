@@ -18,7 +18,7 @@ class FlynIO
         $backend->init();
 
         if (class_exists('\WP_CLI')) {
-            \WP_CLI::add_command('flynio', new \FlynIO\CLI());
+            \WP_CLI::add_command('flynio', '\FlynIO\CLI');
         }
 
         // Scale/convert/optimize full size image on upload
