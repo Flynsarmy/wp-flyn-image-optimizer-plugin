@@ -8,3 +8,5 @@ build:
 filter:
   dependency_paths:
     - wordpress/
+    - vendor/
+    - vendor/wp-cli/wp-cli/php/
