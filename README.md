@@ -6,6 +6,14 @@
 
 This plugin automatically compresses and scales down overly large images on upload.
 
+## What it Does
+
+On upload:
+* the full-size image will be checked for min/max size constraints and scale if necessary
+* It will then be optimized for filesize
+* After thumbs are generated, a WebP copy of each size is created with the same filename + `.webp` suffix.
+* If enabled, all `<img>` tags on your sites frontend will be replaced with `<picture>` tags that use the WebP file with original file as a fallback for browsers without WebP support.
+
 ## Installation
 
 * `git clone` to */wp-content/plugins/flyn-image-optimizer*
