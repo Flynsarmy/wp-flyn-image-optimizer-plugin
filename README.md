@@ -8,7 +8,7 @@ This plugin automatically compresses and scales down overly large images on uplo
 
 ## Installation
 
-* `git clone` to */wp-content/plugins/flyn-wp-image-optimizer*
+* `git clone` to */wp-content/plugins/flyn-image-optimizer*
 * `composer install`
 * For Ubuntu: `apt-get update && apt-get install advancecomp pngcrush gifsicle jpegoptim imagemagick pngnq optipng pngquant`
 * For OSX: `brew install advancecomp pngcrush gifsicle jpegoptim imagemagick pngnq optipng pngquant svgo wp-cli`
