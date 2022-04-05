@@ -55,7 +55,6 @@ use WP_Query;
  */
 class CLI extends WP_CLI_Command
 {
-
     /**
      * Clear the WP object cache after this many regenerations/imports.
      *
@@ -244,7 +243,7 @@ class CLI extends WP_CLI_Command
         $metadata = wp_get_attachment_metadata($id);
         if (!is_array($metadata)) {
             WP_CLI::warning("Unable to load metadata for $att_desc.");
-            
+
             return [$successes, $errors + 1, $skips];
         }
 
@@ -259,7 +258,7 @@ class CLI extends WP_CLI_Command
             if ($scale) {
                 $img = $this->manager->make($fullsizepath);
                 $scaled = $this->scaler->scale($img);
-                
+
                 if ($scaled) {
                     $img->save();
                     $metadata['width'] = $img->width();
@@ -288,7 +287,7 @@ class CLI extends WP_CLI_Command
         }
 
         $created = $this->maybeCreateWebPs($paths);
-        
+
         if (!$scaled && !$optimized && $created === 0) {
             $thumbnail_desc = $image_size ? sprintf('"%s" thumbnail', $image_size) : 'thumbnail';
             WP_CLI::log("$progress Skipped $thumbnail_desc regeneration for $att_desc.");
@@ -307,7 +306,7 @@ class CLI extends WP_CLI_Command
             WP_CLI::log("$progress " . implode(', ', $messages) . " for $att_desc.");
             $successes++;
         }
-            
+
         return [$successes, $errors, $skips];
     }
 

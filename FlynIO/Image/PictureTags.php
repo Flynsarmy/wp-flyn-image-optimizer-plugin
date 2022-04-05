@@ -29,7 +29,7 @@ class PictureTags
         $dom = new \DOMDocument();
         @$dom->loadHTML($htmlTag);
         $domTag = $dom->getElementsByTagName('img')->item(0);
-        
+
         $attributes = [];
         foreach ($domTag->attributes as $attr) {
             $attributes[$attr->nodeName] = $attr->nodeValue;
@@ -50,7 +50,7 @@ class PictureTags
         foreach ($attributes as $attribute => $value) {
             $html .= "{$attribute}=\"{$value}\" ";
         }
-        
+
         return $html;
     }
 
@@ -94,8 +94,8 @@ class PictureTags
         if (isset($imgAttribs['sizes'])) {
             $sourceAttribs['sizes'] = $imgAttribs['sizes'];
         }
-            
-        
+
+
         return '<picture>' .
             '<source ' . $this->arrayToHTMLAttribs($sourceAttribs) . '/>' .
             '<img ' . $this->arrayToHTMLAttribs($imgAttribs) . ' />' .

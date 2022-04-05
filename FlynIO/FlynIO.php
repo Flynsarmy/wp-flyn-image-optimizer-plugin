@@ -23,7 +23,7 @@ class FlynIO
 
         // Scale/convert/optimize full size image on upload
         add_filter('wp_handle_upload', [$this, 'handleUpload']);
-    
+
         // Generate WebP's of thumb sizes on creation
         add_filter('wp_generate_attachment_metadata', [$this, 'handleThumbGeneration'], 10, 3);
         // Delete WebP's along with jpegs/pngs
@@ -181,7 +181,7 @@ class FlynIO
         if (apply_filters('flynio-generate-webp-images', true)) {
             try {
                 $webp = new WebP();
-    
+
                 if ($webp->canConvert()) {
                     $webp->convert($img, $params['file'] . '.webp');
                 }
@@ -189,7 +189,7 @@ class FlynIO
                 ;
             }
         }
-        
+
         return $params;
     }
 

@@ -25,7 +25,7 @@ class Optimizer
         'pngquant',
         'svgo'
     ];
-    
+
     public function optimize(string $filepath): void
     {
         $this->getFactory()->get()->optimize($filepath);
@@ -41,7 +41,7 @@ class Optimizer
         // Get the options that will be passed to the optimizer
         // See if there are any overrides for binary paths
         $options = $this->getOptions();
-        
+
         // Loop through checking for an _bin option override
         $filteredPaths = array_map(function ($binary) use ($options) {
             return Utils::arrayGet($options, "{$binary}_bin", $binary);
@@ -58,7 +58,7 @@ class Optimizer
     public function getInstalledBinaries(): array
     {
         $binaries = [];
-        
+
         foreach ($this->getBinaryPaths() as $binary => $path) {
             $binaries[$binary] = $this->isBinaryInstalledAtPath($path);
         }
@@ -93,7 +93,7 @@ class Optimizer
     {
         return new OptimizerFactory($this->getOptions(), $this->getLogger());
     }
-    
+
     public function getOptions(): array
     {
         return apply_filters('flynio-optimizer-options', []);
