@@ -5,6 +5,11 @@ name: CI - PHP
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on: [push]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -14,18 +19,18 @@ jobs:
 
     strategy:
       matrix:
-        php: [8.0]
+        php: [8.3]
 
-    name: PHP-${{ matrix.php }} 
+    name: PHP-${{ matrix.php }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
 
     - name: Cache PHP dependencies
-      uses: actions/cache@v1
+      uses: actions/cache@v5
       with:
         path: vendor
         key: ${{ runner.OS }}-build-${{ hashFiles('**/composer.lock') }}
